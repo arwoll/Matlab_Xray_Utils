@@ -1,4 +1,8 @@
-function varargout = si_ecal_v4(file, scann, ctr, varargin)
+function varargout = si_ecal(file, scann, ctr, varargin)
+% function varargout = si_ecal(file, scann, ctr, varargin)
+% 2014 Jan 23 : changed  name FROM si_ecal_v4 to si_ecal in conjunction to
+% adopting version control
+% 
 % Calibrate energy from a GID scan of si powder. Input is the spec data
 % file, scan number, and a guess for the energy. Routine refines the peak
 % positions and re-calculates the best-fit energy. The scan is assumed to
