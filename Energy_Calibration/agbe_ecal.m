@@ -1,4 +1,4 @@
-function si_ecal_v3(file, scann, ctr, varargin)
+function agbe_ecal(file, scann, ctr, varargin)
 % Calibrate energy from a GID scan of si powder. Input is the spec data
 % file, scan number, and a guess for the energy. Routine refines the peak
 % positions and re-calculates the best-fit energy. The scan is assumed to
@@ -53,7 +53,8 @@ nus = 180/pi*2*asin(12.4./(E_guess*2*ds));
 com = zeros(length(nus), 1);
 for k=1:length(ds)
     ranges{k} = find((nu>nus(k)-1) .* (nu<nus(k)+1));
-    pd(k) = find_peak(nu(ranges{k})', dir(ranges{k})');
+    pd(k) = find_peak(nu(ranges{k})', dir(ranges{k})', ...
+        'back', [1 length(ranges{k})]);
     com(k) = pd(k).com;
 end
 
