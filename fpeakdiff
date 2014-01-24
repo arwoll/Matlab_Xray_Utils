@@ -1,0 +1,37 @@
+5,7d4
+< % 'thresh' optional arg in added 6/19/07 for use with openspec-1.1, particularly
+< % looking at diffuse data from G3, wich very asymmetric peaks...
+< %
+15c12
+< %                background.
+---
+> %     background.
+17,18d13
+< %     'thresh':  The fractional value of the peak to use as threshold (default = 0.5.
+< %                Note that in this case, fwhm is really the  FW at thresh*MAX
+27c22
+<     'bkgd',zeros(size(y)));
+---
+>     'bkgd',zeros(size(y)), 'bkgd_fit', []);
+36d30
+< threshold = 0.5;
+45,46d38
+<         case 'thresh'
+<             threshold = varargin{k+1};
+84c76
+<     hm = mx*threshold;
+---
+>     hm = mx/2.0;
+127c119
+<         peak_data.ch_com(k) = sum([wl:wr]'  .*y(wl:wr,k))/sum(y(wl:wr,k));
+---
+>         peak_data.ch_com(k) = sum((wl:wr)'  .*y(wl:wr,k))/sum(y(wl:wr,k));
+132a125,132
+>     if ~strcmp(mode, 'mean')
+>         bkgd_fits{k} = f;
+>     end
+> end
+> if strcmp(mode, 'mean')
+>    rmfield(peak_data, 'bkgd_fit'); 
+> else
+>    peak_data.bkgd_fit = bkgd_fits;
