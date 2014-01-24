@@ -17,7 +17,7 @@ imagesc(s(1).q_par, s(1).q_perp,log(s(1).z+1), log(cra))
 hold on
 imagesc(s(2).q_par, s(2).q_perp,log(s(2).z+1), log(cra))
 imagesc(s(3).q_par, s(3).q_perp,log(s(3).z+1), log(cra))
-imagesc(s(4).q_par, s(4).q_perp,log(s(4).z+1), log(cra))
+%imagesc(s(4).q_par, s(4).q_perp,log(s(4).z+1), log(cra))
 %imagesc(s(3).q_par, s(3).q_perp(p3_indices),log(s(3).z(p3_indices,:)+1), log(cra))
 
 
@@ -30,7 +30,11 @@ axis equal tight
 bigfonts
 xlabel(['Q_{||} [' char(197) '^{-1}]'])
 ylabel(['Q_{\perp} [' char(197) '^{-1}]'])
-title_str = sprintf('%s : Scans %d, %d, %d and %d', ...
-    fname, scans(1), scans(2), scans(3), scans(4));
+%title_str = sprintf('%s : Scans %d, %d, %d and %d', ...
+%    fname, scans(1), scans(2), scans(3), scans(4));
+
+title_str = sprintf('%s : Scans %d, %d, and %d', ...
+    fname, scans(1), scans(2), scans(3));
+
 title(strrep(title_str, '_', '\_'));
 
