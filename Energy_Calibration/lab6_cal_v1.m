@@ -64,9 +64,11 @@ pks = [1 1 1;
     4 2 0;
     4 2 1;
     3 3 2;
-    5 0 0;
-    4 3 1;
-    3 3 3];
+    5 0 0];
+%    4 3 1;
+%    3 3 3];
+
+pks = pks(1:8,:);
 
 a_lab6 = 4.157;
 
@@ -97,6 +99,7 @@ end
 title 'LaB6 PXRD'
 xlabel 'delta aka tth'
 axis tight
+bigfonts
 
 y = sind(com/2);
 x = 1./(2*ds);
@@ -105,11 +108,13 @@ lambda = lm3.p1; E = 12.4/lambda;
 y_calc = lm3(x);
 subplot(2,1,2)
 plot(x, y, 'bo', x, y_calc, 'r-');
+bigfonts
 
 title(['Slope = lambda = ', num2str(lambda), ' Ang, E = ',num2str(E), ' keV' ]) 
 xlabel '1/2d'
 ylabel 'sin(tth/2)'
 fprintf('Best fit E = %f\n', 12.4/lambda);
+axis tight
 
 tth_err = 2*asin(y_calc) - 2*asin(y);
 

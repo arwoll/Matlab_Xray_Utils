@@ -24,15 +24,19 @@ end
 load(matfile)
 getq = @(nu) 4*pi*E/12.4 * sind(nu/2);
 
-specd = scandata.spec;
+if isfield(scandata, 'spec')
+    specd = scandata.spec;
+else
+    specd = scandata;
+end
 
 nu = double(specd.var1);
-dcal = scandata.ecal;
-ch = scandata.channels;
+dcal = specd.ecal;
+ch = specd.channels;
 
 if calc_del_offset
-    del_offset = scandata.spec.motor_positions(...
-        strcmp(scandata.spec.motor_names, 'Delta'));
+    del_offset = specd.motor_positions(...
+        strcmp(specd.motor_names, 'Delta'));
 else
     del_offset = 0;
 end
@@ -46,12 +50,18 @@ del = del_offset + dcal(1) + ch*dcal(2) + dcal(3)*ch.^2;
 
 q_par = getq(nu);
 q_perp = getq(del);
-z = double(scandata.mcadata);
+z = double(specd.mcadata);
 
 %% clean up bad pixels
 row_sums = sum(z, 2);
+nrows = length(row_sums);
 bad = find(row_sums == 0);
 for k = 1:length(bad)
+    if bad(k) == 0 
+        z(bad(k), :) = z(bad(k)+1, :);
+    elseif bad(k) == nrows
+        z(bad(k), :) = z(bad(k)-1, :);
+    end
    z(bad(k), :) = 0.5 * ( z(bad(k)-1, :) + z(bad(k)+1, :));
 end
 
