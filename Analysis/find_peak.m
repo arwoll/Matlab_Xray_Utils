@@ -2,6 +2,9 @@ function peak_data = find_peak(x,y, varargin)
 % peak_data = find_peak(x,y, varargin)
 % Returns information about the peak in y
 %
+% 'thresh' optional arg in added 6/19/07 for use with openspec-1.1, particularly
+% looking at diffuse data from G3, wich very asymmetric peaks...
+%
 % y values are assumed to be column vectors, i.e.  Multiple y values can be placed in
 % adjacent columns of y.  x, at present, is only allowed to be a single
 % vector
@@ -9,8 +12,10 @@ function peak_data = find_peak(x,y, varargin)
 % varargin can either be empty, in which case no background subtraction is
 % performed, or can be one or more pairs of parameter / value pairs:
 %     'mode'  : 'mean', 'lin' or 'quad' for linear/quadratic estimation of the
-%     background.
+%                background.
 %     'back'  :  indices of x to be used for background estimation.
+%     'thresh':  The fractional value of the peak to use as threshold (default = 0.5.
+%                Note that in this case, fwhm is really the  FW at thresh*MAX
 %
 % TODO: 1. list all output fields of peak_data
 %       2. check checks for array size
@@ -19,7 +24,7 @@ function peak_data = find_peak(x,y, varargin)
 peak_data = struct('wl', 1, 'wr', 1, 'xli', 1, 'xri', 1, 'xl', 1, 'xr',1, ...
     'fwhm', 1, 'com', 1, 'ch_com', 1, ...
     'counts', 1, 'area', 1, 'delta', 1, ...
-    'bkgd',zeros(size(y)), 'bkgd_fit', []);
+    'bkgd',zeros(size(y)));
 
 if length(x) == 1
     return
@@ -28,6 +33,7 @@ end
 mode = 'mean';
 bk = [];
 bkgd = 0;
+threshold = 0.5;
 sampley = [];
 nvarargin = nargin - 2;
 for k = 1:2:nvarargin
@@ -36,6 +42,8 @@ for k = 1:2:nvarargin
             mode = varargin{k+1};
         case 'back'
             bk = varargin{k+1};
+        case 'thresh'
+            threshold = varargin{k+1};
         otherwise
             warndlg(sprintf('Unrecognized variable %s',varargin{k}));
     end
@@ -73,7 +81,7 @@ for k = 1:size(y, 2)
     end
 
     [mx, mi] = max(y(:,k));
-    hm = mx/2.0;
+    hm = mx*threshold;
 
     walk = mi;
 
@@ -116,20 +124,12 @@ for k = 1:size(y, 2)
         peak_data.ch_com(k) = mean([wl:wr]);
     else
         peak_data.com(k) = sum(x(wl:wr).*y(wl:wr,k))/sum(y(wl:wr,k));
-        peak_data.ch_com(k) = sum((wl:wr)'  .*y(wl:wr,k))/sum(y(wl:wr,k));
+        peak_data.ch_com(k) = sum([wl:wr]'  .*y(wl:wr,k))/sum(y(wl:wr,k));
     end
     peak_data.counts(k) = sum(y(:,k));
     peak_data.area(k) = abs(x(2)-x(1))*peak_data.counts(k);
     peak_data.delta(k) = sqrt(sum(y(:,k)));
     peak_data.bkgd(:,k) = bkgd;
-    if ~strcmp(mode, 'mean')
-        bkgd_fits{k} = f;
-    end
-end
-if strcmp(mode, 'mean')
-   rmfield(peak_data, 'bkgd_fit'); 
-else
-   peak_data.bkgd_fit = bkgd_fits;
 end
 
 % An alternative way of getting the area is to use only the counts within
