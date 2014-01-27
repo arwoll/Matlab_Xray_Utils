@@ -1,0 +1,3 @@
+openspec_1.1 indexes comments within a scan -- used to find the
+	     position of laser shots during PLD in streak-camera mode -- May 07
+openspec_1.2 implements a processing routine for a 'fastmesh' scan, used for the Wyeth run, July 07
