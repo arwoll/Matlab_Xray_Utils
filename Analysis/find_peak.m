@@ -24,7 +24,7 @@ function peak_data = find_peak(x,y, varargin)
 peak_data = struct('wl', 1, 'wr', 1, 'xli', 1, 'xri', 1, 'xl', 1, 'xr',1, ...
     'fwhm', 1, 'com', 1, 'ch_com', 1, ...
     'counts', 1, 'area', 1, 'delta', 1, ...
-    'bkgd',zeros(size(y)));
+    'bkgd',zeros(size(y)), 'bkgd_fit', []);
 
 if length(x) == 1
     return
@@ -59,8 +59,14 @@ elseif strcmp(mode,'quad')
 	fopts = fitoptions(ftype);
 end
 
+ncolumns = size(y, 2);
 
-for k = 1:size(y, 2)
+if ~strcmp(mode, 'mean')
+    bkgd_fit = cell(ncolumns, 1);
+end
+
+
+for k = 1:ncolumns
     if ~isempty(bk)
         xbk = x(bk); ybk = y(bk,k);
         switch mode
@@ -130,6 +136,15 @@ for k = 1:size(y, 2)
     peak_data.area(k) = abs(x(2)-x(1))*peak_data.counts(k);
     peak_data.delta(k) = sqrt(sum(y(:,k)));
     peak_data.bkgd(:,k) = bkgd;
+    if ~strcmp(mode, 'mean')
+        bkgd_fit{k} = f;
+    end
+end
+
+if strcmp(mode, 'mean')
+   peak_data = rmfield(peak_data, 'bkgd_fit'); 
+else
+   peak_data.bkgd_fit = bkgd_fit;
 end
 
 % An alternative way of getting the area is to use only the counts within
