@@ -1,6 +1,10 @@
 function [specscan, errors] = openspec(specfilename, scan_number)
 % function [specscan, errors] = openspec(specfilename, scan_number)
 %
+% Placed openspec (v 1.3) onto Github within Matlab_Xray_Utils repository
+% 
+% 
+%
 % March 08 -- openspec-1.3 in ~woll/Matlab/woll_xrf. Add 'hklscan' type.
 % Noted something peculiar: The counters seem to be counted wrong -- see
 % e.g. ascan case where specscan.ctrs = headers(3:end); Shouldn't this be
