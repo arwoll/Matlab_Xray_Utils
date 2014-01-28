@@ -6,7 +6,7 @@
 % might go wrong.
 
 % BM102913_1 : garden variety XRR a2scan's
-s = openspec('Test_data/BM102913_1', 10);
+s = openspec('Test_data/BM102913_1_cut', 13);
 
 %%
 % HKLscan
