@@ -10,7 +10,7 @@ s = openspec('Test_data/BM102913_1_cut', 13);
 
 %%
 % HKLscan
-s = openspec('Test_data/LCO_STO_Spe_cut', 144);
+s = openspec('Test_data/LCO_STO_Spe_cut', 50);
 
 %% "smesh" scan for dynamically tracking the surface in CXRF
 % Plot shows a picture 
