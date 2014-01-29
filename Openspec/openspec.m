@@ -154,7 +154,7 @@ h = msgbox('Loading Spec data, please wait...(patiently)', 'Open', 'warn');
 lines = 0;
 data = [];
 [data_cell, stop_position] = textscan(specfile, '%f32');
-if length(data_cell{1})> 0
+if ~isempty(data_cell{1})
     data = [data' data_cell{1}']';
 end
 
@@ -224,7 +224,7 @@ while any(strcmp(tok, {'#C', '@A', '@AMCA', '@B', '@AMCS1', '@AMCS2'}))
         end
     end    
     [data_cell, stop_position] = textscan(specfile, '%f32');
-    if length(data_cell{1})> 0 
+    if ~isempty(data_cell{1}) 
         lines = lines+1;
         data = [data' data_cell{1}']';
 %        if lines == 1 && ~isempty(mcadev)
@@ -352,7 +352,7 @@ switch scan_type
         end
         specscan.dims = 1;
         specscan.size = specscan.npts;
-    case {'smesh', 'mesh'}
+    case {'smesh', 'mesh', 'hklmesh'}
         specscan.ctrs = headers(4:end);
         if strcmp(scan_type, 'smesh')
             var1_n = str2double(scan_pars{7})+1;
