@@ -72,7 +72,7 @@ end
 if TIMETEST; tic; end
 
 % Find the correct scan and abort if not found
-[scanline, scan_mark, motor_mark] = find_scan(specfile, scan_number);
+[scanline, scan_mark, motor_mark] = find_scan(specfilename, scan_number);
 
 if TIMETEST; fprintf('Just found scan: '); toc; end
 if TIMETEST; tic; end
@@ -621,7 +621,7 @@ switch scan_type
         return
 end % -------- switch -------------
 
-function [scanline, scan_mark, motor_mark] = find_scan(specfile, scan)
+function [scanline, scan_mark, motor_mark] = find_scan(specfilename, scan)
 % [scanline, scan_mark, motor_mark] = find_scan(specfile, scan)
 % Assumes specfile is alredy open. Makes no noise if the scan is not found, but
 % returns scanline = -1.  
@@ -631,20 +631,37 @@ function [scanline, scan_mark, motor_mark] = find_scan(specfile, scan)
 %
 % In textscan, the format spec %[^\n] reads all characters other than newline (none
 % of which are present since find_line strips them from scanline).
-scanline = '';
+scanline = -1;
 scan_mark = -1;
 motor_mark = -1;
-while ischar(scanline)
-    [scanline, index, mark] = find_line(specfile, {'#S', '#O0'});
-    if index == 2
-        motor_mark = mark;
-        continue
-    else
-        scan_mark = mark;
-        foo = textscan(scanline, '%d %[^\n]');
-        if foo{1} == scan
-            scanline = char(foo{2});
-            break
-        end
-    end
+
+if ~isunix
+    warndlg('Oops : this version of openspec for unix/mac only');
+    return
 end
+
+% Use text scan to grab all byte offsets and scans
+[st1, scanlines] = system(['grep -be "#S" "' specfilename '"']);
+scan_indices = textscan(scanlines, '%d:#S %d%[^\n]%*[\n]');
+% if scan_indices{2}(scan) == scan
+%     scan_mark = scan_indices{1}(scan);
+%     scanline = scan_indices{3}{scan};
+% else
+    match = find(scan_indices{2} == scan);
+    if isempty(match)
+        return
+    elseif length(match) > 1
+        warnstr = sprintf('Oops : Found %d distinct scan #%d''s. Which one?', ...
+            length(match), scan);
+        specscan = inputdlg(warnstr, 'Select',1,{'1'});
+        specscan = sscanf(specscan{1}, '%d', 1);
+        match = match(specscan);
+    end
+    scan_mark = scan_indices{1}(match);
+    scanline = scan_indices{3}{match};
+% end
+
+[st2, motorlines] = system(['grep -be "#O0" "' specfilename '"']);
+motor_indices = textscan(motorlines, '%d:%*[^\n]%*[\n]');
+% motor_indices = motor_indices{1};
+motor_mark = motor_indices{1}(find(motor_indices{1} < scan_mark, 1, 'last'));
