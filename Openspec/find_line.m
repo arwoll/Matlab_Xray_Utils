@@ -26,11 +26,15 @@ end
 SCAN_STR = '%s%[^\n]%[\n]';
 mark = ftell(specfile);
 [foo, next_mark] = textscan(specfile, SCAN_STR, 1); 
-while ~isempty(foo) && ~any(strcmp(foo{1}, headstr))
-    mark = next_mark;
-    [foo, next_mark] = textscan(specfile, SCAN_STR, 1);
+try 
+    while ~isempty(foo) && ~any(strcmp(foo{1}, headstr))
+        mark = next_mark;
+        [foo, next_mark] = textscan(specfile, SCAN_STR, 1);
+    end
+catch
+    foo
 end
-if ~isempty(foo)
+if ~isempty(foo) && ~isempty(foo{1})
     if length(foo)>1
         textline = char(foo{2});
     end
