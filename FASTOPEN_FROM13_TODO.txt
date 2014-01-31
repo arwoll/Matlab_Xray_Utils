@@ -1,0 +1,24 @@
+
+There are some changes of the master branch since fastopen_from13 was created.  Thus I think the proper way to proceed is to first merge the new master into fastopen_from13:
+
+First, on "surprise": I do:
+
+git pull fastopen_from13.
+ *or* 
+git pull origin fastopen_from13
+ *or*
+git fetch origin fastopen_from13
+ *or* use the github gui...
+
+THEN:
+
+git checkout fastopen_from13
+git merge master 
+
+# perform tests, especially with gidview.
+
+git checkout master
+git merge fastopen_from13
+git commit v1.5  (A new version).
+
+Note: In general what are the various ways I SHOULD indicate versions?
