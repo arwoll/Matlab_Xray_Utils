@@ -3,8 +3,10 @@ function [textline, varargout] = find_line(specfile, headstr)
 % Searches a pre-opened textfile, fid=specfile, for a line whos first token
 % matches any string in the string or cell array headstr, returning
 % the remainder of that line.  If the optional 2nd and third arguments
-% are given, also returns the index of the element in headstr which matched and 
-% the file position of the line which matched.
+% are given, also returns:
+%    varargout{2} = the index of the element in headstr which matched and 
+%    varargout{2} = the file position just before the 1st character of the 
+%                   matching line. 
 %
 % The main use of the fancy additions is in find_scan, internal to
 % openspec, where we want to find the desired scan, but also flag
@@ -40,6 +42,8 @@ if ~isempty(foo) && ~isempty(foo{1})
     end
     if nargout == 3
         varargout{1} = find(strcmp(foo{1}, headstr));
-        varargout{2} = mark;
+        varargout{2} = mark;   % Note that mark is the position returned 
+                               % by the textscan PRIOR to the one that 
+                               % found the correct line.
     end
 end
