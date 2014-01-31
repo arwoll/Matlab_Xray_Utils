@@ -2,11 +2,12 @@
 
 Utilities are divided into descriptive directories. 
 
-Many of the scripts here relate to data obtained using proprietary software, SPEC (Certified Scientific Software, www.certif.com), and require an additional utility, "openspec" which is not part of this distribution. (When available, a link will be provided). 
+Many of the scripts here relate to data obtained using proprietary software, SPEC (Certified Scientific Software, www.certif.com), and make use of the Openspec/openspec.m in this distribution.
 
 ToDo for this README: 
-* how to obtain a copy -- possibly linking to a read-only version onto Google Drive
-* Reference to test scripts and data sets within each subdirectory
+* To obtain a copy : git clone https://github.com/arwoll/Matlab_Xray_Utils.git
+* Several test scripts are available in subdirectories: look for [package]_tests.m, 
+* 	  and make use of data within 'Test_data' subdirs
 * Guidelines for modifying & contributing
 
  
