@@ -83,10 +83,10 @@ if ~ischar(scanline) || isempty(scanline)
     return
 end
 
+motor_names = []; motor_positions = [];
 if motor_mark > -1
     fseek(specfile, motor_mark, -1);
     [tok, nextline] = strtok(fgetl(specfile));
-    motor_names = [];
     if ischar(nextline)
         while length(tok)>1 && strcmp(tok(1:2),'#O')
             motor_names = [motor_names regexp(nextline, SPEC_LABEL_REGEXP, 'match')];
@@ -103,23 +103,26 @@ fseek(specfile, scan_mark,-1);
 % Read in motor positions in the same fashion as the motor names
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-tok = '#P0';
-nextline = find_line(specfile, tok);
-
-motor_positions = [];
-if ischar(nextline)
-    while length(tok)>1 && strcmp(tok(1:2),'#P')
-        motor_positions = [motor_positions sscanf(nextline,'%g')'];
-        %mark = ftell(specfile);
-        nextline = fgetl(specfile);
-        [tok, nextline] = strtok(nextline);
+if ~isempty(motor_names)
+    tok = '#P0';
+    nextline = find_line(specfile, tok);
+    if ischar(nextline)
+        while length(tok)>1 && strcmp(tok(1:2),'#P')
+            motor_positions = [motor_positions sscanf(nextline,'%g')'];
+            %mark = ftell(specfile);
+            nextline = fgetl(specfile);
+            [tok, nextline] = strtok(nextline);
+        end
+        
     end
-
-end
-
-if length(motor_names) ~= length(motor_positions)
+    
+    if length(motor_names) ~= length(motor_positions)
         errors = add_error(errors,2, sprintf('Warning: Found %d motor names, but %d motor positions.', ...
-        length(motor_names), length(motor_positions)));
+            length(motor_names), length(motor_positions)));
+    end
+else
+    nextline = fgetl(specfile);
+   [tok, nextline] = strtok(nextline); 
 end
 
 MCA_channels = [];
@@ -173,7 +176,7 @@ end
 mcadata = [];
 MCA_fields = {};
 comments = [];
-while any(strcmp(tok, {'#C', '@A', '@AMCA', '@B', '@AMCS1', '@AMCS2'}))
+while any(strcmp(tok, {'#C', '@A', '@AMCA', '@B', '@AMCS1', '@AMCS2', '@mca1'}))
     if strcmp(tok, '#C') 
         if ~isempty(regexp(nextline, 'aborted', 'ONCE'))
             aborts = aborts + 1;
