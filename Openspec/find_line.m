@@ -29,7 +29,7 @@ SCAN_STR = '%s%[^\n]%[\n]';
 mark = ftell(specfile);
 [foo, next_mark] = textscan(specfile, SCAN_STR, 1); 
 try 
-    while ~isempty(foo) && ~any(strcmp(foo{1}, headstr))
+    while ~isempty(foo{1}) && ~any(strcmp(foo{1}, headstr))
         mark = next_mark;
         [foo, next_mark] = textscan(specfile, SCAN_STR, 1);
     end
