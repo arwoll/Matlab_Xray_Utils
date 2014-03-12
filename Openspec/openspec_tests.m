@@ -18,4 +18,4 @@ s = openspec('Test_data/teniers5', 34);
 imagesc(squeeze(log(s.data(7,:,:)+1)))
 
 %% Test for mca file format from Quad element data obtained at F3 -- March 2014
-s = openspec('pyro_grazing.scan7.mca1.mca', 7);
+s = openspec('Test_data/pyro_grazing.scan7.mca1.mca', 7);
