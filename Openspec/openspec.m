@@ -1,6 +1,12 @@
 function [specscan, errors] = openspec(specfilename, scan_number)
 % function [specscan, errors] = openspec(specfilename, scan_number)
 %
+% openspec version 1.4 was my original attempt at speeding up find_scan by executing
+%     grep in a UNIX shell, invoking the "system()" function in matlab. Clearly, this 
+%     operation is system independent. As of March 2014, this branch has been made
+%     obsolete by a new implementation of find_scan in the master branch.
+%
+%
 % Placed openspec (v 1.3) onto Github within Matlab_Xray_Utils repository
 % 
 % 
