@@ -51,11 +51,11 @@ while tok(1) =='#'
         nextline = [fgetl(fileid) char(13)];
         fileheader = horzcat(fileheader, nextline);
         [tok, partline] = strtok(nextline);
-        foo = textscan(partline, '%s: %f %s', 'whitespace', ' \b\t:');
-        for k = 1:length(foo)
-           ion_chambers(k).name = foo{1}{k};
-           ion_chambers(k).sensitivity = foo{2}(k);
-           switch foo{3}{k}
+        values = textscan(partline(1:end-1), '%s %f %s', 'whitespace', ' \b\t:');
+        for k = 1:length(values{1})
+           ion_chambers(k).name = values{1}{k};
+           ion_chambers(k).sensitivity = values{2}(k);
+           switch values{3}{k}
                case 'nA/V'
                    ion_chambers(k).sensitivity = ion_chambers(k).sensitivity * 1e-9;
                case 'pA/V'
@@ -67,12 +67,12 @@ while tok(1) =='#'
         nextline = [fgetl(fileid) char(13)];
         fileheader = horzcat(fileheader, nextline);
         [tok, partline] = strtok(nextline);
-        foo = textscan(partline, '%s %f %f', 'whitespace', ' \b\t:/');
-        for k = 1:length(foo{1})
-           this_ic = strcmp(foo{1}{k}, ic_names);
+        values = textscan(partline(1:end-1), '%s %f %f', 'whitespace', ' \b\t:/');
+        for k = 1:length(values{1})
+           this_ic = strcmp(values{1}{k}, ic_names);
            if any(this_ic)
-               ion_chambers(this_ic).V0 = foo{2}(k);
-               ion_chambers(this_ic).V1 = foo{3}(k);
+               ion_chambers(this_ic).V0 = values{2}(k);
+               ion_chambers(this_ic).V1 = values{3}(k);
            end
         end
     end
