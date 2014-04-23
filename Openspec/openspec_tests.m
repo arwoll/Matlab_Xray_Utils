@@ -19,3 +19,8 @@ imagesc(squeeze(log(s.data(7,:,:)+1)))
 
 %% Test for mca file format from Quad element data obtained at F3 -- March 2014
 s = openspec('Test_data/pyro_grazing.scan7.mca1.mca', 7);
+
+%% dependencies:
+%names = dependencies.toolboxDependencyAnalysis({'openspec.m', 'find_scan.m', 'add_error.m', 'find_line.m'})
+%names = 
+%    'MATLAB'    'Symbolic Math Toolbox'
