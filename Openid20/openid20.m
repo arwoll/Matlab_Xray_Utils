@@ -51,7 +51,8 @@ while tok(1) =='#'
         nextline = [fgetl(fileid) char(13)];
         fileheader = horzcat(fileheader, nextline);
         [tok, partline] = strtok(nextline);
-        values = textscan(partline(1:end-1), '%s %f %s', 'whitespace', ' \b\t:');
+        values = textscan(partline(1:end-1), '%s %f %s', ...
+            'Delimiter', {' ','\t','\b',':'}, 'MultipleDelimsAsOne', 1);
         for k = 1:length(values{1})
            ion_chambers(k).name = values{1}{k};
            ion_chambers(k).sensitivity = values{2}(k);
@@ -67,7 +68,9 @@ while tok(1) =='#'
         nextline = [fgetl(fileid) char(13)];
         fileheader = horzcat(fileheader, nextline);
         [tok, partline] = strtok(nextline);
-        values = textscan(partline(1:end-1), '%s %f %f', 'whitespace', ' \b\t:/');
+        %values = textscan(partline(1:end-1), '%s %f %f', 'whitespace', ' \b\t:/');
+        values = textscan(partline(1:end-1), '%s %f %s', ...
+            'Delimiter', {' ','\t','\b',':', '/'}, 'MultipleDelimsAsOne', 1);
         for k = 1:length(values{1})
            this_ic = strcmp(values{1}{k}, ic_names);
            if any(this_ic)
