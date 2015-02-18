@@ -176,7 +176,8 @@ end
 mcadata = [];
 MCA_fields = {};
 comments = [];
-while any(strcmp(tok, {'#C', '@A', '@AMCA', '@B', '@AMCS1', '@AMCS2', '@mca1'}))
+while ~isempty(tok) && (strcmp(tok, '#C') || tok(1) == '@')
+%while any(strcmp(tok, {'#C', '@A', '@AMCA', '@B', '@AMCS1', '@AMCS2', '@mca1'}))
     if strcmp(tok, '#C') 
         if ~isempty(regexp(nextline, 'aborted', 'ONCE'))
             aborts = aborts + 1;
@@ -264,6 +265,8 @@ if ~isempty(mcadata)
         for k = 1:length(MCA_fields)
             specscan.(MCA_fields{k}) = mcadata.(MCA_fields{k});
         end
+    else
+        specscan.mcaname = MCA_fields{1};
     end
     specscan.mcadata = mcadata.(MCA_fields{1});
     if isempty(channels)
@@ -281,8 +284,10 @@ specscan.scanline = scanline;
 specscan.npts = lines;
 specscan.columns = ncolumns;
 specscan.headers = headers;
-specscan.motor_names = motor_names;
-specscan.motor_positions = motor_positions;
+if ~isempty(motor_names)
+    specscan.motor_names = motor_names;
+    specscan.motor_positions = motor_positions;
+end
 
 specscan.comments = comments;
 
