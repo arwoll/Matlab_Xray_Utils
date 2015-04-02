@@ -1,4 +1,4 @@
-function make_composite_multi(fname, scans, Energy, i2norm)
+function make_composite_multi(fname, scans, Energy, i2norm, varargin)
 % function make_composite_multi(spec_fname, scans, Energy, i2norm_cts)
 % Attenuation matching between scan 3 (att=1) and scans 4 & 5 (att=0):
 % figure(2);plot(q_perp1, z1(:,51)*4, q_perp2, z2(:,1))
@@ -10,7 +10,12 @@ function make_composite_multi(fname, scans, Energy, i2norm)
 
 figure(1)
 clf;
-cra = [2 5000];
+
+if nargin == 5
+    cra = varargin{1};
+else
+    cra = [8 1000];
+end
 for k = 1:length(scans)
     fprintf('Opening %s scan %d\n', fname, scans(k));
     [s(k).q_par s(k).q_perp s(k).z] = open_gid_v1(sprintf('%s_%03d.mat', fname, ...
