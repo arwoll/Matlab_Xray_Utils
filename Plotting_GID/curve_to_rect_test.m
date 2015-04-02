@@ -40,7 +40,7 @@ imagesc(rect_qpar, rect_qperp, log(rtz'./norm'+1)); axis xy
 %figs = [47];
 tic
 for f = 1:length(figs) %1:length(figs)
-    matfile = sprintf('YSZ0828_20131209_%03d.mat', figs(f));
+    matfile = sprintf('Test_data/YSZ0828_20131209_%03d.mat', figs(f));
     [q_par, q_perp, z] = open_gid_v4(matfile, E, 'i2norm', i2norm);
     if f == 1
         [rtz, norm] = curve_to_rect(q_par', q_perp', z', rect_qpar, rect_qperp);

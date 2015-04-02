@@ -11,6 +11,11 @@ if isequal(export_name, 0)
     fprintf('File not saved\n');
 else
     set(fig_num, 'PaperPositionMode', 'auto');
-    print(['-f' num2str(fig_num)],'-dpng','-r300', '-painters',...
-             fullfile(path, [export_name_eps(1:end-4) '.png']));
+    if ~strfind(version, 'R2014b')
+        print(['-f' num2str(fig_num)],'-dpng','-r300', '-painters',...
+            fullfile(path, [export_name_eps(1:end-4) '.png']));
+    else
+        print(['-f' num2str(fig_num)],'-dpng','-r300', '-painters',...
+            fullfile(path, [export_name_eps(1:end-4) '.png']));
+    end
 end
