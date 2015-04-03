@@ -99,11 +99,19 @@ ymap = xmap;
 
 for i = 1:width 
     for j = 1:height
+        % The following conditional is designed to ignore input values
+        % outside the desired range.
+        if q_par(i,j) < rect_qpar_shift(1) || ...
+                q_par(i,j) > rect_qpar_shift(end)+rect_width || ...
+             q_perp(i,j) < rect_qperp_shift(1) || ...
+                q_perp(i,j) > rect_qperp_shift(end)+rect_height   
+            continue
+        end
         highpx_x = find(q_par(i,j) > rect_qpar_shift, 1);
         highpx_y = find(q_perp(i,j) > rect_qperp_shift, 1);
-        if isempty(highpx_x) || isempty(highpx_y)
-            error('q_par or q_perp out of range of rect_qpar or rect_qperp');
-        end
+%        if isempty(highpx_x) || isempty(highpx_y)
+%            error('q_par or q_perp out of range of rect_qpar or rect_qperp');
+%        end
         % An additional check would be that q_par(i,j) <
         % rect_qpar_shift(highpx_x+1) etc.
         xmap(i, j) = highpx_x - 0.5 + ...

@@ -10,9 +10,6 @@ addpath('/home/aw30/Matlab/Gidview:', ...
      '/home/aw30/Matlab/Matlab_Xray_Utils/Plotting_General:', ...
      '/home/aw30/Matlab/Matlab_Xray_Utils/Misc:')
 
-% Setup Plotting defaults (from Plotting_General)
-plotting_defaults
-
 % define Bragg Calcs (from Misc)
 bragg_calcs
 
