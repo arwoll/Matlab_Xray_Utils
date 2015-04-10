@@ -6,8 +6,7 @@ dafs = get(0, 'DefaultAxesFontSize'); dtfs = get(0, 'DefaulttextFontSize');
 set(0, 'DefaultAxesFontSize', afs); set(0, 'DefaulttextFontSize', tfs);
 set(0, 'DefaultAxesLineWidth', 1);
 
-foo = colormap(gray);
-yarg = foo(end:-1:1, :);
+load yarg.mat
 
 % Plotting notes. The above properties will not affect fonts after the
 % figure has been placed. If you want to make figure 3 have font 20 axes,
