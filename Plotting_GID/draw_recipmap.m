@@ -11,6 +11,7 @@ imagesc(qpar, qperp, log(z+1), log(cra));
 axis equal tight xy
 
 title_str = sprintf('%s_scans%s', fname, num2str(scans, '_%d'));
+title_str = strrep(title_str, ' ', '');
 title(strrep(title_str, '_', '\_'));
 xlabel(['Q_{||} [' char(197) '^{-1}]'])
 ylabel(['Q_{\perp} [' char(197) '^{-1}]'])
