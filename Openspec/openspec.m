@@ -1,4 +1,4 @@
-function [specscan, errors] = openspec(specfilename, scan_number)
+function [specscan, errors] = openspec(specfilename, varargin)
 % function [specscan, errors] = openspec(specfilename, scan_number)
 %
 % Placed openspec (v 1.3) onto Github within Matlab_Xray_Utils repository
@@ -61,6 +61,13 @@ TIMETEST = 0;
 
 errors.code=0;
 specscan = [];
+
+if nargin < 2
+    scan_number = 1;
+else
+    scan_number = varargin{1};
+end
+
 
 specfile = fopen(specfilename, 'r');
 if specfile == -1
@@ -231,9 +238,6 @@ while ~isempty(tok) && (strcmp(tok, '#C') || tok(1) == '@')
     if ~isempty(data_cell{1}) 
         lines = lines+1;
         data = [data' data_cell{1}']';
-%        if lines == 1 && ~isempty(mcadev)
-%            ncolumns = length(data_cell{1});
-%        end
     end
     nextline = fgetl(specfile);
     if nextline == -1
