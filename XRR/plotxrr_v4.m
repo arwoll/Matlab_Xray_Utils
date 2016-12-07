@@ -10,85 +10,8 @@
 %%
 %corrs = [5.6103e4; 243.0573; 88.3790; 1.3205; 0.2245; 0.2282; 0.2282];
 
-% fname = 'D263-0HR'; scans = 5:10;
-
-% fname = 'SLS_0HR_PH3'; scans = [13:19];
-
-% fname = 'SLS_0HR_PH3'; scans = [27:33];
-
-% fname = 'SLS_1HR_PH3'; scans = [3:9];
-
-% fname = 'SLS_5HR_PH3'; scans = [3:9];
-
-% fname = 'SLS_10HR_PH3'; scans = [3:9];
-
-% fname = 'SLS_50HR_PH3'; scans = [3:9];
-
-% fname = 'SLS_100HR_PH3'; scans = [3:9];
-
-% fname = 'SLS_150HR_PH3'; scans = [3:9];
-
-% fname = 'SLS_200HR_PH3'; scans = [3:9];
-
-% fname = 'D263_0HR_PH3_NEW'; scans = [7:13];
-
-% fname = 'D263_1HR_PH3'; scans = [3:9];
-
-% fname = 'D263_5HR_PH3'; scans = [3:9];
-
-% fname = 'D263_10HR_PH3'; scans = [3:9];
-
-% fname = 'D263_50HR_PH3'; scans = [3:9];
-
-% fname = 'D263_100HR_PH3'; scans = [3:9];
-
-% fname = 'D263_150HR_PH3'; scans = [3:9];
-
-% fname = 'D263_200HR_PH3'; scans = [3:9];
-
-% fname = 'D263_250HR_PH3'; scans = [7:13];
-
-% fname = 'D263_1HR_PH9'; scans = [3:9];
-
-% fname = 'D263_5HR_PH9'; scans = [3:9];
-
-% fname = 'D263_10HR_PH9'; scans = [3:9];
-
-% fname = 'D263_50HR_PH9'; scans = [3:9];
-
-% fname = 'D263_100HR_PH9'; scans = [3:9];
-
-% fname = 'MICROSLIDES_0D'; scans = [3:9];
-
-% fname = 'MICROSLIDES_1D'; scans = [3:9];
-
-% fname = 'MICROSLIDES_2D'; scans = [3:9];
-
-% fname = 'MICROSLIDES_4D'; scans = [3:9];
-
-% fname = 'MICROSLIDES_7D'; scans = [3:9];
-
-% fname = 'MICROSLIDES_1M'; scans = [3:9];
-
-% fname = 'MICROSLIDES_2M'; scans = [3:9];
-
-% fname = 'MICROSLIDES_3M'; scans = 3:9;
-
-% fname = 'BORONFLOAT_1D'; scans = [3:9];
-
-% fname = 'BORONFLOAT_2D'; scans = [5:11];
-
-% fname = 'BORONFLOAT_4D'; scans = [7:13];
-
-% fname = 'BORONFLOAT_7D'; scans = [3:9];
-
-% fname = 'BORONFLOAT_1M'; scans = [5:11];
-
-% fname = 'BORONFLOAT_2M'; scans = [7:13];
-
-% fname = 'BORONFLOAT_3M'; scans = [5:11];
-
-fname = 'P1_UNCOATED'; scans = [7:13];
+% fname = ''; scans = [8:14];
+fname = 'with_epi'; scans = [4:9];
 
 corrs = ones(20,1);
 corrs(1) = 2e4;
@@ -106,7 +29,7 @@ alldata = zeros(10000, 3);
 ind_start = 1;
 figure(fign);
 for k = 1:length(scans)
-    scandata = openspec(['../raw/' fname], scans(k));
+    scandata = openspec(fname, scans(k));
     %save(matfile, 'scandata', '-append');
     x = scandata.var1;
     y = scandata.data(strcmp(scandata.headers, ycol), :)';
@@ -139,14 +62,14 @@ for k = 1:length(scans)
 end
 alldata = alldata(1:ind_end, :);
 
-xlabel 'Two-theta (degrees)'
+xlabel(scandata.mot1); % 'Two-theta (degrees)'
 title(strrep(outname_base, '_', '\_'));
 x = alldata(:,1); y = alldata(:,2);
 axis([floor(min(x)) ceil(max(x)) 10^(floor(log10(min(y)))) 10^(ceil(log10(max(y))))]);
 
-fign_pos = get(gcf, 'Position');
-set(gcf, 'Position', [fign_pos(1) fign_pos(2) 840 560]);
-export_png(fign, outname_base);
+%fign_pos = get(gcf, 'Position');
+%set(gcf, 'Position', [fign_pos(1) fign_pos(2) 840 560]);
+%export_png(fign, outname_base);
 
 save(refl_file, 'alldata', '-ascii')
 
