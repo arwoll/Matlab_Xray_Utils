@@ -80,8 +80,8 @@ for k = 1:length(bad)
     end
 end
 
-% normcts will be a 1 x NPTS (row) vector
-normcts = double(specd.data(strcmp(specd.headers, 'I2'), :));
+% normcts will be a 1 x NPTS (row) vector; updated after 2017-01-24 (selecting only the 1st instance of "I2")
+normcts = double(specd.data(find(strcmp(specd.headers, 'I2'), 1), :));
 if isempty(i2norm)
     i2norm = mean(normcts);
 end
