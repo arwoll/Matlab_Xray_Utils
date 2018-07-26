@@ -130,6 +130,8 @@ else
    [tok, nextline] = strtok(nextline); 
 end
 
+ncolumns = 0;
+headers = [];
 MCA_channels = [];
 channels = [];
 ecal = [];
@@ -252,15 +254,20 @@ fclose(specfile);
 for k = 1:length(comments)
     comments(k).line = comments(k).point/ncolumns;
 end
-lines = length(data)/ncolumns;
 
-if ~lines
-    errors = add_error(errors, 1, sprintf('No data found in scan %d of file %s\n',...
-        scan_number,specfilename));
-    return
+if ncolumns == 0 
+    lines = 0;
+else
+    lines = length(data)/ncolumns;
 end
 
-specscan.data = reshape(data, ncolumns, lines);
+if ~lines
+    errors = add_error(errors, 2, sprintf('No scalar data found in scan %d of file %s\n',...
+        scan_number,specfilename));
+    %return
+else
+    specscan.data = reshape(data, ncolumns, lines);
+end
 
 if ~isempty(mcadata)
     if length(MCA_fields) > 1
@@ -303,6 +310,12 @@ if specscan.cttime <= 0
 end
 
 if TIMETEST; fprintf('Done reading spec file:'); toc; end
+
+% This tests whether there is scalar data. mcadata may not be empty, as
+% with mcadata exported from PyMCA
+if ncolumns == 0
+    return
+end
 
 % specscan.complete = 1: scan is complete
 %                     0: scan is incomplete, but no subsequent scan is
