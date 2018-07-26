@@ -11,7 +11,7 @@
 %corrs = [5.6103e4; 243.0573; 88.3790; 1.3205; 0.2245; 0.2282; 0.2282];
 
 % fname = ''; scans = [8:14];
-fname = 'with_epi'; scans = [4:9];
+fname = 'CUALE20170225-1'; scans = [12:18];
 
 corrs = ones(20,1);
 corrs(1) = 2e4;

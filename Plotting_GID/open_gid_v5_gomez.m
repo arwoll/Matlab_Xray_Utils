@@ -1,4 +1,4 @@
-function [q_par, q_perp, z] = open_gid_v5(matfile, E, varargin)
+function [q_par, q_perp, z] = open_gid_v5_gomez(matfile, E, varargin)
 % function make_gidplot_v1(matfile, E, varargin) 
 %   if present, varargin must be a 2-value vector with intensity ranges to
 %   user for the plot
@@ -85,7 +85,7 @@ cosb = cosd(beta);
 cosa = cosd(alpha);
 sina = sind(alpha);
 
-q_par = k*sqrt(cosa^2 + cosb.^2 - 2*cosa*cosb.*cosnu);
+q_par = k*sign(nu).*sqrt(cosa^2 + cosb.^2 - 2*cosa*cosb.*cosnu);
 q_perp = k*(sina + sind(beta));
 
 %q_par = getq(nu);
@@ -110,7 +110,7 @@ for k = 1:length(bad)
 end
 
 % normcts will be a 1 x NPTS (row) vector
-normcts = double(specd.data(find(strcmp(specd.headers, 'I2'),1), :));
+normcts = double(specd.data(strcmp(specd.headers, 'I2'), :));
 if isempty(i2norm)
     i2norm = mean(normcts);
 end

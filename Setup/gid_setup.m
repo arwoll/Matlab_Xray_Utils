@@ -10,5 +10,5 @@ addpath([AW_MATLAB_BASE 'Gidview'], ...
      [AW_MATLAB_BASE 'Matlab_Xray_Utils/Misc'])
 
 % define Bragg Calcs (from Misc)
-bragg_calcs
+%bragg_calcs
 

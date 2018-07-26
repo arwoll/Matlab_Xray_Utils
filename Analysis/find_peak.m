@@ -41,7 +41,7 @@ for k = 1:2:nvarargin
         case 'mode'
             mode = varargin{k+1};
         case 'back'
-            bk = varargin{k+1};
+            bk = column(varargin{k+1});
         case 'thresh'
             threshold = varargin{k+1};
         otherwise
@@ -68,7 +68,7 @@ end
 
 for k = 1:ncolumns
     if ~isempty(bk)
-        xbk = x(bk); ybk = y(bk,k);
+        xbk = column(x(bk)); ybk = double(y(bk,k));
         switch mode
             case 'mean'
                 bkgd_per_point = mean(ybk);
@@ -129,7 +129,7 @@ for k = 1:ncolumns
         peak_data.com(k) = mean(x(wl:wr));
         peak_data.ch_com(k) = mean([wl:wr]);
     else
-        peak_data.com(k) = sum(x(wl:wr).*y(wl:wr,k))/sum(y(wl:wr,k));
+        peak_data.com(k) = sum(column(x(wl:wr)).*y(wl:wr,k))/sum(y(wl:wr,k));
         peak_data.ch_com(k) = sum([wl:wr]'  .*y(wl:wr,k))/sum(y(wl:wr,k));
     end
     peak_data.counts(k) = sum(y(:,k));

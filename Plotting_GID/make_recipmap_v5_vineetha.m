@@ -1,4 +1,4 @@
-function [rect_qpar, rect_qperp, rect_z] = make_recipmap_v5(fname, scans, Energy, i2norm)
+function [rect_qpar, rect_qperp, rect_z] = make_recipmap_v5_vineetha(matfiles, Energy, i2norm)
 % Determine appropriate bounds for the new, rectilinear q-space grid
 % version 5 implements a "delrange" (which should be an input parameter)
 % to use only a subset of the delta data
@@ -11,9 +11,17 @@ max_qperp_size = 0;
 
 delrange = [.4 15];
 
+if iscell(matfiles)
+    scans = length(matfiles);
+elseif ischar(matfiles)
+    tmp = matfiles;
+    matfiles = cell(1,1);
+    matfiles{1} = tmp;
+    scans = 1;
+end
+
 for f = 1:length(scans) %6
-    matfile = sprintf('%s_%03d.mat', fname, scans(f));
-    [q_par, q_perp, z] = open_gid_v5(matfile, Energy, 'i2norm', i2norm, ...
+    [q_par, q_perp, z] = open_gid_v5(matfiles{f}, Energy, 'i2norm', i2norm, ...
         'delrange', delrange);
     min_qpar = min(min_qpar, min(q_par(:)));
     max_qpar = max(max_qpar, max(q_par(:)));
@@ -28,8 +36,7 @@ rect_qperp = min_qperp -max_qperp_size/2.0: max_qperp_size : max_qperp + max_qpe
 
 tic
 for f = 1:length(scans)
-    matfile = sprintf('%s_%03d.mat', fname, scans(f));
-    [q_par, q_perp, z] = open_gid_v5(matfile, Energy, 'i2norm', i2norm,...
+    [q_par, q_perp, z] = open_gid_v5(matfiles{f}, Energy, 'i2norm', i2norm,...
         'delrange', delrange);
     if f == 1
         [rtz, norm] = curve_to_rect(q_par', q_perp', z', rect_qpar, rect_qperp);

@@ -2,7 +2,7 @@ function [rect_d, rect_chi, rect_z] = make_chi_d_v2(fname, scans, Energy, i2norm
 
 % Rectilinear chi-d grid; make into an input parameter at some point...
 rect_chi = 3:0.5:90;
-rect_d = 2.5:0.02:7; 
+rect_d = 1:0.01:5; 
 
 delrange = [.4 10];
 
