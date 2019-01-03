@@ -89,7 +89,19 @@ for k = 1:length(bad)
 end
 
 % normcts will be a 1 x NPTS (row) vector
-normcts = double(specd.data(strcmp(specd.headers, 'I2'), :));
+monitors = {'I2', 'Monitor'};
+for k = 1:length(monitors)
+    use_monitor = strcmp(specd.headers, monitors{k});
+    if any(use_monitor)
+        break
+    end
+end
+if ~any(use_monitor)
+    fprintf('In open_gid_v4: cannot find monitor channel. No normalization\n');
+    return
+end
+normcts = double(specd.data(use_monitor, :));
+%normcts = double(specd.data(strcmp(specd.headers, 'I2'), :));
 if isempty(i2norm)
     i2norm = mean(normcts);
 end
