@@ -1,4 +1,9 @@
 function peak_data = find_peaks(x,y, varargin)
+% NOTE as of 1/3/19: This function appears to be made obsolete by my
+% changes to the find_peak standard function, which can be used to zero in on
+% multiple peaks in a single array suitable for subsequent linear guassian
+% fitting. 
+% 
 % peak_data = find_peaks(x,y, varargin)
 % Returns information about multiple peaks in x vs y. 
 %

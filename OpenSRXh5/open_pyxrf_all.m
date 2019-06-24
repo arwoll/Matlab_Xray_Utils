@@ -15,8 +15,13 @@ if nargin < 1
     return
 elseif ~exist(mcafile, 'file')
     % Need to add an echo, especially if 2nd output arg is not called for
-    errors=add_error(errors,1, ...
-        sprintf('File %s not found', mcafile));
+    emsg = sprintf('File %s not found', mcafile);
+    if nargout > 1
+        errors=add_error(errors,1, ...
+            emsg);
+    else
+        fprintf([emsg '\n']);
+    end
     return
 end
 
@@ -30,7 +35,9 @@ ecal = [0 1];
 mcaformat = 'pyxrf';
 dead = struct('key','none');
 force_save_mat = 0;
-
+E0 = [];
+startx = [];
+make_rois = 0;
 for k = 1:2:nvarargin
     switch varargin{k}
         case 'ecal'
@@ -38,11 +45,19 @@ for k = 1:2:nvarargin
                 ecal = varargin{k+1};
             end
         case 'force'
-            force_save_mat = 1;
+            force_save_mat = varargin{k+1};
+        case 'E0'
+            E0 = varargin{k+1};
+        case 'make_rois'
+            startx = varargin{k+1};
         otherwise
             warndlg(sprintf('Unrecognized variable %s',varargin{k}));
     end
 end       
+
+if ~isempty(startx)
+    make_rois = 1;
+end
 
 [mcapath, mcaname, extn] = fileparts(mcafile);
 
@@ -168,45 +183,79 @@ for k = 1:nfit
     scandata.pyfit(k).name = fnames{k};
 end
 
-if ~exist(matfile) || force_save_mat
-    save(fullfile(mcapath, matfile), 'scandata', '-v7.3');
+%% Gather info about the lines taht were fit
+if nfit > 0 && ~isempty(E0)
+    scandata.E0 = E0;
+    if exist('cs_fluor_total', 'file') == 0
+        addpath( '/home/aw30/Matlab/Xraylib:')
+        xraylib_setup
+    end
+    if exist('elamdb.mat', 'file') == 2
+        load elamdb
+    end
+    roi =  scandata.pyfit;
+    
+    sym = fnames;
+    group = sym;
+    nA = sym;
+    element_syms = fields(elamdb.n);
+    for k = 1:length(fnames)
+        foo = strsplit(fnames{k}, '_');
+        roi(k).E = NaN;
+        if ~any(strcmp(element_syms, foo{1}))
+            fprintf('This fit line -- %s -- not an element\n', fnames{k});
+            continue
+        end
+        roi(k).sym = foo{1};
+        roi(k).group = foo{2};
+        roi(k).nA = elamdb.n.(roi(k).sym);
+        [sigma_f, extn] = cs_fluor_total(roi(k).nA, roi(k).group, E0);
+        roi(k).E = extn;
+        roi(k).sigma_f = sigma_f;
+    end
+    
+    [vals, indices] = sort([roi.E]);
+    roi = roi(indices);    
+    scandata.pyfit = roi;
+    scandata.fnames = scandata.fnames(indices);
 end
 
+if ~exist(matfile, 'file') || force_save_mat
+    save(matfile, 'scandata', '-v7.3');
+end
 
-%return
-% quality of fit?
+if make_rois
+    E_peaks = startx;
+    npeaks = numel(E_peaks);
+    E = scandata.energy;
+    mcadims = size(scandata.mcadata);
+    if scandata.dims == 1
+        roidims = [mcadims(2) 1];
+    else
+        roidims = mcadims(2:end);
+    end
+    mca2D = reshape(scandata.mcadata, mcadims(1), prod(mcadims(2:end)));
+    Isum = sum(mca2D, 2);
+    multi_peaks = find_peak(E, Isum, 'startx', E_peaks);
 
-%% Gather info about the lines taht were fit
-% if exist('cs_fluor_total', 'file') == 0
-%     addpath( '/home/aw30/Matlab/Xraylib:')
-%     xraylib_setup
-% end
-% roi =  scandata.roi;
-% 
-% sym = fnames;
-% group = sym;
-% nA = sym;
-% load elamdb  % loads ele, a structure with element info, and n, a structure of atomic numbers 
-% element_syms = fields(elamdb.n);
-% for k = 1:length(fnames)
-%    foo = strsplit(fnames{k}, '_'); 
-%    roi(k).E = NaN;
-%    if ~any(strcmp(element_syms, foo{1}))
-%        fprintf('This fit line -- %s -- not an element\n', fnames{k});
-%        continue
-%    end
-%    roi(k).sym = foo{1};
-%    roi(k).group = foo{2};
-%    roi(k).nA = elamdb.n.(roi(k).sym);
-%    [sigma_f, extn] = cs_fluor_total(roi(k).nA, roi(k).group, E0);
-%    roi(k).E = extn;
-%    roi(k).sigma_f = sigma_f;
-% end
-% 
-% [vals, indices] = sort([roi.E]);
-% roi = roi(indices);
-% scandata.fnames = {roi.name};
-% 
-% scandata.roi = roi;
+    roi = struct('e_roi', 1, 'y', 1, 'e_com', 1, 'ch_com', 1, 'e_fwhm', 1, ...
+        'compare', 1, 'bkgd', 1, 'chi', 1);
+    
+    for k = 1:npeaks
+        sub_ind = multi_peaks.el(k):multi_peaks.er(k);
+        Esub = E(sub_ind);
+        ysub = double(scandata.mcadata(sub_ind, :));
+        pd = gauss_fit(Esub, ysub);
+        roi(k).y = reshape(pd.area, roidims);
+        roi(k).e_roi = sub_ind;
+        roi(k).e_com = pd.com;
+        roi(k).ch_com = pd.ch_com;
+        roi(k).e_fwhm = pd.fwhm;
+        roi(k).compare = pd.compare;
+        roi(k).bkgd = pd.bkgd;
+        roi(k).chi = pd.chi;
+    end
+    scandata.roi = roi;
+end
 return
 
