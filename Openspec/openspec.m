@@ -500,7 +500,8 @@ switch scan_type
         % this is not generally the case. Also, the 3rd column of data is
         % assumed to be the timer, which should always be nonzero and hence
         % should be a good proxy for a bad channel
-        mcs_zeros = specscan.data(3, :) == 0;
+        %mcs_zeros = specscan.data(3, :) == 0;
+        mcs_zeros = specscan.data(5, :) == 0;
         nzeros = sum(mcs_zeros(:));
         if nzeros>0
             err_str = sprintf('Warning: Found/fixed %d zero-rows in flymesh.\n', ...
