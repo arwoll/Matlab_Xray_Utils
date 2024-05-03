@@ -8,6 +8,7 @@ function [q_par, q_perp, z] = open_gid_v4(matfile, E, varargin)
 
 calc_del_offset = 1;
 i2norm = [];
+scann=0;
 
 nvarargin = nargin - 2;
 for k = 1:2:nvarargin
@@ -16,21 +17,28 @@ for k = 1:2:nvarargin
             calc_del_offset = varargin{k+1};
         case 'i2norm'
             i2norm = varargin{k+1};
+        case 'scann'
+            scann = varargin{k+1};
         otherwise
             warndlg(sprintf('Unrecognized variable %s',varargin{k}));
     end
 end
 
-load(matfile)
+if strcmp(matfile(end-3:end), '.mat')
+    load(matfile)
+elseif (scann ~= 0)
+    scandata = openspec(matfile, scann);
+end
 %getq = @(nu) 4*pi*E/12.4 * sind(nu/2);
 
-scan_dims=size(scandata.mcadata);
 
 if isfield(scandata, 'spec')
     specd = scandata.spec;
 else
     specd = scandata;
 end
+
+scan_dims=size(scandata.mcadata);
 
 nu = repmat(double(specd.var1)', scan_dims(1), 1) ;
 dcal = specd.ecal;
@@ -81,7 +89,19 @@ for k = 1:length(bad)
 end
 
 % normcts will be a 1 x NPTS (row) vector
-normcts = double(specd.data(strcmp(specd.headers, 'I2'), :));
+monitors = {'I2', 'Monitor'};
+for k = 1:length(monitors)
+    use_monitor = strcmp(specd.headers, monitors{k});
+    if any(use_monitor)
+        break
+    end
+end
+if ~any(use_monitor)
+    fprintf('In open_gid_v4: cannot find monitor channel. No normalization\n');
+    return
+end
+normcts = double(specd.data(use_monitor, :));
+%normcts = double(specd.data(strcmp(specd.headers, 'I2'), :));
 if isempty(i2norm)
     i2norm = mean(normcts);
 end

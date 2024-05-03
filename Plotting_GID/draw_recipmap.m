@@ -1,5 +1,5 @@
 function [qpar, qperp, z] = draw_recipmap(fname, scans, Energy, i2norm, varargin)
-
+%function [qpar, qperp, z] = draw_recipmap(fname, scans, Energy, i2norm, varargin)
 if nargin == 5
     cra = varargin{1};
 else

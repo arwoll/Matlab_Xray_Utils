@@ -8,6 +8,7 @@ function [q_par q_perp z] = open_gid_v1(matfile, E, varargin)
 
 calc_del_offset = 1;
 i2norm = [];
+scann=0;
 
 nvarargin = nargin - 2;
 for k = 1:2:nvarargin
@@ -16,12 +17,20 @@ for k = 1:2:nvarargin
             calc_del_offset = varargin{k+1};
         case 'i2norm'
             i2norm = varargin{k+1};
+        case 'scann'
+            scann = varargin{k+1};
         otherwise
             warndlg(sprintf('Unrecognized variable %s',varargin{k}));
     end
 end
 
-load(matfile)
+if strcmp(matfile(end-3:end), '.mat')
+    load(matfile)
+elseif (scann ~= 0)
+    scandata = openspec(matfile, scann);
+end
+
+%load(matfile)
 getq = @(nu) 4*pi*E/12.4 * sind(nu/2);
 
 if isfield(scandata, 'spec')
@@ -69,6 +78,8 @@ end
 normcts = double(specd.data(strcmp(specd.headers, 'I2'), :));
 if isempty(i2norm)
     i2norm = mean(normcts);
+else
+   fprintf('i2norm/mean(normcts) = %.2f\n', i2norm/mean(normcts)); 
 end
 norm_mat = i2norm./ repmat(normcts, size(z,1), 1);
 

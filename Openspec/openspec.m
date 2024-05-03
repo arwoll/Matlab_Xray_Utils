@@ -1,10 +1,8 @@
-function [specscan, errors] = openspec(specfilename, scan_number)
+function [specscan, errors] = openspec(specfilename, varargin)
 % function [specscan, errors] = openspec(specfilename, scan_number)
 %
 % Placed openspec (v 1.3) onto Github within Matlab_Xray_Utils repository
 % 
-% 
-%
 % March 08 -- openspec-1.3 in ~woll/Matlab/woll_xrf. Add 'hklscan' type.
 % Noted something peculiar: The counters seem to be counted wrong -- see
 % e.g. ascan case where specscan.ctrs = headers(3:end); Shouldn't this be
@@ -61,6 +59,13 @@ TIMETEST = 0;
 
 errors.code=0;
 specscan = [];
+
+if nargin < 2
+    scan_number = 1;
+else
+    scan_number = varargin{1};
+end
+
 
 specfile = fopen(specfilename, 'r');
 if specfile == -1
@@ -125,6 +130,8 @@ else
    [tok, nextline] = strtok(nextline); 
 end
 
+ncolumns = 0;
+headers = [];
 MCA_channels = [];
 channels = [];
 ecal = [];
@@ -231,9 +238,6 @@ while ~isempty(tok) && (strcmp(tok, '#C') || tok(1) == '@')
     if ~isempty(data_cell{1}) 
         lines = lines+1;
         data = [data' data_cell{1}']';
-%        if lines == 1 && ~isempty(mcadev)
-%            ncolumns = length(data_cell{1});
-%        end
     end
     nextline = fgetl(specfile);
     if nextline == -1
@@ -250,15 +254,20 @@ fclose(specfile);
 for k = 1:length(comments)
     comments(k).line = comments(k).point/ncolumns;
 end
-lines = length(data)/ncolumns;
 
-if ~lines
-    errors = add_error(errors, 1, sprintf('No data found in scan %d of file %s\n',...
-        scan_number,specfilename));
-    return
+if ncolumns == 0 
+    lines = 0;
+else
+    lines = length(data)/ncolumns;
 end
 
-specscan.data = reshape(data, ncolumns, lines);
+if ~lines
+    errors = add_error(errors, 2, sprintf('No scalar data found in scan %d of file %s\n',...
+        scan_number,specfilename));
+    %return
+else
+    specscan.data = reshape(data, ncolumns, lines);
+end
 
 if ~isempty(mcadata)
     if length(MCA_fields) > 1
@@ -301,6 +310,12 @@ if specscan.cttime <= 0
 end
 
 if TIMETEST; fprintf('Done reading spec file:'); toc; end
+
+% This tests whether there is scalar data. mcadata may not be empty, as
+% with mcadata exported from PyMCA
+if ncolumns == 0
+    return
+end
 
 % specscan.complete = 1: scan is complete
 %                     0: scan is incomplete, but no subsequent scan is
@@ -360,8 +375,8 @@ switch scan_type
         end
         specscan.dims = 1;
         specscan.size = specscan.npts;
-    case {'smesh', 'mesh', 'hklmesh'}
-        specscan.ctrs = headers(4:end);
+    case {'smesh', 'mesh', 'hklmesh'} %, 'flymesh', 'f2scan'}
+        specscan.ctrs = headers(3:end);
         if strcmp(scan_type, 'smesh')
             var1_n = str2double(scan_pars{7})+1;
             var2_n = str2double(scan_pars{11})+1;
@@ -461,7 +476,103 @@ switch scan_type
         % (var2_n*var1_n) + (n_fast- (var3_n-1)*var2_n) * var1_n
         specscan.dims = 3;
         specscan.size = [var1_n var2_n var3_n];
-    case 'fastmesh'
+    case 'flymesh'
+        specscan.ctrs = headers(3:end);
+        var1_n = str2double(scan_pars{5})+1;
+        % Approximate increment...
+        var1_inc = (str2double(scan_pars{4})-str2double(scan_pars{3}))/var1_n;
+        var1_order = sign(var1_inc);
+        var2_n = str2double(scan_pars{9})+1;
+        var2_order = 2 * (str2double(scan_pars{8}) > str2double(scan_pars{7})) - 1;
+        n_fast = var2_n;
+        
+        specscan.mot1 = scan_pars{2};
+        specscan.mot2 = scan_pars{6};
+        % Eliminate duplicates (only needed for earliest version of fastmesh)
+        positions = specscan.data(1:2,:);
+        %[goodvals, unique_cols, repeated_cols] = unique(positions', 'rows');
+        %specscan.data = specscan.data(:, unique_cols);
+        %specscan.npts = length(unique_cols);
+        
+        % take care of zeros in MCS data from Nov2017 @ G3, and possibly
+        % others in Dec 2018 @ A1.
+        % For G3 data, zeros were always at the trailing end of a line, but
+        % this is not generally the case. Also, the 3rd column of data is
+        % assumed to be the timer, which should always be nonzero and hence
+        % should be a good proxy for a bad channel
+        %mcs_zeros = specscan.data(3, :) == 0;
+        mcs_zeros = specscan.data(5, :) == 0;
+        nzeros = sum(mcs_zeros(:));
+        if nzeros>0
+            err_str = sprintf('Warning: Found/fixed %d zero-rows in flymesh.\n', ...
+                nzeros);
+            errors = add_error(errors,2, err_str);
+            fprintf(err_str);
+            zero_cols = find(mcs_zeros);
+            for k = zero_cols
+                if k == 1
+                    %first_good = find(2:size(data, 2), 1' 'first')
+                    specscan.data(3:end, k) = specscan.data(3:end, k+1);
+                else
+                    specscan.data(3:end, k) = specscan.data(3:end, k-1);
+                end
+            end
+        else
+           fprintf('No zeros found in flymesh\n');
+        end
+
+        % First, sort the data so that it makes a nice array, and save the order to
+        % apply to the mcadata. Calling this with, e.g. [2 1] as the input
+        % argument sorts in ascending order by the 2nd column first (the
+        % slow axis), then ascending order of the 1st column next
+        [sorted_data, order] = sortrows(specscan.data', [var2_order*2 var1_order*1]);
+        specscan.data = sorted_data';
+        specscan.order = order;
+        %specscan.order = unique_cols(order);
+        planned_npts = var1_n*var2_n;
+        
+        if planned_npts ~= specscan.npts
+            specscan.complete = -1*strcmp(tok, '#S');
+            specscan.extra = mod(specscan.npts, var1_n);
+            if specscan.extra ~= 0
+                specscan.npts = specscan.npts - specscan.extra;
+                %specscan.var2 = specscan.var2(1:specscan.npts);
+            end
+            var2_n = specscan.npts/var1_n;
+            specscan.data=reshape(specscan.data(:,1:specscan.npts), ...
+                ncolumns, var1_n, var2_n);
+            if nzeros>0
+                mcs_zeros = mcs_zeros(order);
+                specscan.mcs_zeros = reshape(mcs_zeros(1:specscan.npts), var1_n, var2_n);
+            end
+            if ~isempty(mcadata)
+                specscan.mcadata = reshape(specscan.mcadata(:,1:specscan.npts), ...
+                    MCA_channels, var1_n, var2_n);
+            end
+            
+            if length(specscan.cttime)>1
+                specscan.cttime = specscan.data(cttime_col, :, :);
+            end
+        else
+            specscan.data=reshape(specscan.data,ncolumns, var1_n, var2_n);
+            if nzeros > 0
+                mcs_zeros = mcs_zeros(order);
+                specscan.mcs_zeros = reshape(mcs_zeros, var1_n, var2_n);
+            end
+            if length(specscan.cttime)>1
+                specscan.cttime = reshape(specscan.cttime, var1_n, var2_n);
+            end
+            if ~isempty(mcadata)
+                specscan.mcadata = reshape(specscan.mcadata,MCA_channels, var1_n, var2_n);
+            end
+        end
+        specscan.var1_n = var1_n*ones(1,var2_n);  % An array, necessary to re-order mcadata later...
+        specscan.var1 = squeeze(specscan.data(1,:,:));
+        specscan.var2 = squeeze(specscan.data(2,:,:));
+
+        specscan.dims = 2;
+        specscan.size = [var1_n var2_n];
+    case {'fastmesh', 'flymesh_dev'}
         specscan.ctrs = headers(3:end);
         var1_n = str2double(scan_pars{5})+1;
         % Approximate increment...
@@ -542,7 +653,6 @@ switch scan_type
 
         specscan.dims = 2;
         specscan.size = [max_var1 var2_n];
-        
     case 's2zoom'
         specscan.ctrs = headers(5:end);
         var1_inc = str2double(scan_pars{5});

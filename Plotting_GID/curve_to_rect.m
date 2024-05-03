@@ -77,6 +77,9 @@ function [rtz, norm, varargout] = curve_to_rect(q_par, q_perp, cvz, rect_qpar, r
 %        xlabel(['Q_{||} [' char(197) '^{-1}]'])
 %        ylabel(['Q_{\perp} [' char(197) '^{-1}]'])
 
+MAX_WARNINGS = 100;
+warn_ctr = 0;
+
 out_width = length(rect_qpar);
 out_height = length(rect_qperp);
 rtz = zeros(out_width, out_height);
@@ -158,9 +161,11 @@ for i = 1:width
         end
         
         % Unsure of following -- probably a catch for border or bad pixels
-        if (ywid>5.0) || (xwid>5.0) 
-            fprintf('Warning: Pixel (%d, %d) is over 5 wide or tall\n', i,j);
+        if ((ywid>5.0) || (xwid>5.0)) && warn_ctr < MAX_WARNINGS 
+            fprintf(['Warning at Pixel (%d, %d): xwid, ywid = (%d, %d) ' ...
+                '-- should be less than 5\n'], i,j, xwid, ywid);
             xwid = 1.0; ywid = 1.0;
+            warn_ctr = warn_ctr+1;
         end
         
         % Barna (1999() mistakenly writes these as "min" rather than "max" 

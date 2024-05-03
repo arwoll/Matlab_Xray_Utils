@@ -15,7 +15,7 @@ for k = 1:length(matfiles)
         continue
     end
     
-        f = fopen(fullmtxfile, 'wt');
+    f = fopen(fullmtxfile, 'wt');
     fprintf(f, '# Raw Data from Diode Array : 640 rows, one column per point in scan\n');
     fprintf(f, '#S %d  %s\n', scandata.spec.scann, scandata.spec.scanline);
     fprintf(f, '# Delta CALIB A   B   C = %g %g %g\n', scandata.spec.ecal(1), ...

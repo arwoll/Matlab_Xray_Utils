@@ -1,0 +1,20 @@
+Working out dead time calc. 
+DXP delivers "triggers", "livetime", "realtime", and "output_evts".
+I start by presuming that triggers == fastpeaks
+Then p. 95 of DXP Mercury manual (Prospect Software version 1.0.x) says:
+
+ICR_m = FASTPEAKS/LIVETIME
+OCR = EVTSINRUN/REALTIME
+
+Then to 0th order:
+
+N_true = N_meas * ICR_m/OCR
+
+where ICR_m is used as an apprimation to ICR_t.
+
+For better correction we must know the fast channel dead time,
+tau_fast, and then invert:
+
+ICR_m = ICR_t * exp(-ICR_t * tau_fast)
+
+
